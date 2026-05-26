@@ -1,755 +1,1049 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>insiderbuying — Real-time insider intelligence</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background: #ffffff;
-            color: #1d1d1f;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.6;
-        }
-
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            color: #1d1d1f;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #1d1d1f;
-            font-size: 14px;
-            font-weight: 500;
-            transition: opacity 0.3s;
-        }
-
-        .nav-links a:hover {
-            opacity: 0.6;
-        }
-
-        .btn-premium {
-            padding: 8px 20px;
-            background: #0071e3;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-premium:hover {
-            background: #0077ed;
-        }
-
-        .hero {
-            padding-top: 120px;
-            padding-bottom: 80px;
-            background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
-            text-align: center;
-        }
-
-        .hero-content {
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .hero h1 {
-            font-size: 56px;
-            font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -1.5px;
-            margin-bottom: 24px;
-            color: #1d1d1f;
-        }
-
-        .hero p {
-            font-size: 20px;
-            color: #666;
-            font-weight: 400;
-            max-width: 600px;
-            margin: 0 auto 32px;
-            line-height: 1.5;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-primary {
-            padding: 12px 32px;
-            background: #0071e3;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            background: #0077ed;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            padding: 12px 32px;
-            background: transparent;
-            color: #0071e3;
-            border: 2px solid #0071e3;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: #0071e3;
-            color: white;
-        }
-
-        section {
-            padding: 80px 24px;
-        }
-
-        .section-content {
-            max-width: 980px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            font-size: 36px;
-            font-weight: 600;
-            margin-bottom: 48px;
-            text-align: center;
-            letter-spacing: -0.5px;
-        }
-
-        .section-subtitle {
-            font-size: 18px;
-            color: #666;
-            text-align: center;
-            margin-bottom: 48px;
-            font-weight: 400;
-        }
-
-        .metrics-section {
-            background: #ffffff;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .metric {
-            padding: 32px;
-            border-radius: 12px;
-            background: #f5f5f7;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .metric:hover {
-            background: #efefef;
-            transform: translateY(-4px);
-        }
-
-        .metric-number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #0071e3;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .metric-subtext {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-        }
-
-        .trades-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-            margin-bottom: 40px;
-        }
-
-        .trade-card {
-            padding: 24px;
-            background: white;
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .trade-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .trade-rank {
-            display: inline-flex;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #0071e3;
-            color: white;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-
-        .trade-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1d1d1f;
-            margin-bottom: 4px;
-        }
-
-        .trade-company {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 16px;
-        }
-
-        .trade-symbol {
-            display: inline-block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #0071e3;
-            background: #e8f2ff;
-            padding: 4px 12px;
-            border-radius: 12px;
-            margin-right: 8px;
-        }
-
-        .trade-return {
-            font-size: 13px;
-            font-weight: 600;
-            color: #34c759;
-        }
-
-        .sectors-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .sector-card {
-            padding: 40px;
-            border-radius: 12px;
-            text-align: center;
-            color: white;
-            transition: all 0.3s;
-        }
-
-        .sector-card:hover {
-            transform: scale(1.05);
-        }
-
-        .sector-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .sector-volume {
-            font-size: 24px;
-            font-weight: 700;
-            opacity: 0.95;
-        }
-
-        .chart-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            margin-bottom: 40px;
-        }
-
-        .chart-box {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
-        }
-
-        .chart-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: #1d1d1f;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 280px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-
-        .feature {
-            padding: 32px;
-            border-radius: 12px;
-            background: #f5f5f7;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .feature:hover {
-            background: #efefef;
-        }
-
-        .feature-icon {
-            font-size: 32px;
-            margin-bottom: 16px;
-        }
-
-        .feature-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1d1d1f;
-        }
-
-        .feature-desc {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .cta-section {
-            background: linear-gradient(135deg, #0071e3 0%, #0055b8 100%);
-            color: white;
-            text-align: center;
-            padding: 80px 24px;
-        }
-
-        .cta-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .cta-title {
-            font-size: 40px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
-        }
-
-        .cta-text {
-            font-size: 16px;
-            margin-bottom: 32px;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .btn-cta {
-            padding: 12px 32px;
-            background: white;
-            color: #0071e3;
-            border: none;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        footer {
-            background: #f5f5f7;
-            padding: 40px 24px;
-            text-align: center;
-            color: #666;
-            font-size: 13px;
-        }
-
-        @media (max-width: 768px) {
-            nav {
-                padding: 12px 16px;
-            }
-
-            .logo {
-                font-size: 16px;
-            }
-
-            .nav-links {
-                gap: 16px;
-            }
-
-            .hero h1 {
-                font-size: 36px;
-            }
-
-            .hero p {
-                font-size: 16px;
-            }
-
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-
-            .trades-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .sectors-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            section {
-                padding: 48px 16px;
-            }
-
-            .section-title {
-                font-size: 28px;
-                margin-bottom: 32px;
-            }
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>insiderbuying — Where Smart Money Moves</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		html {
+			scroll-behavior: smooth;
+		}
+
+		body {
+			background: #000000;
+			color: #f5f5f7;
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			overflow-x: hidden;
+		}
+
+		/* NAVIGATION */
+		nav {
+			position: fixed;
+			top: 0;
+			width: 100%;
+			padding: 12px 24px;
+			background: rgba(0, 0, 0, 0.7);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			z-index: 1000;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.logo {
+			font-size: 16px;
+			font-weight: 600;
+			letter-spacing: -0.5px;
+			background: linear-gradient(135deg, #00d9ff, #0099ff);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		.nav-links {
+			display: flex;
+			gap: 32px;
+			align-items: center;
+		}
+
+		.nav-links a {
+			text-decoration: none;
+			color: #f5f5f7;
+			font-size: 13px;
+			font-weight: 500;
+			transition: color 0.3s ease;
+			position: relative;
+		}
+
+		.nav-links a:hover {
+			color: #00d9ff;
+		}
+
+		.nav-links a::after {
+			content: '';
+			position: absolute;
+			bottom: -4px;
+			left: 0;
+			width: 0;
+			height: 2px;
+			background: linear-gradient(90deg, #00d9ff, #0099ff);
+			transition: width 0.3s ease;
+		}
+
+		.nav-links a:hover::after {
+			width: 100%;
+		}
+
+		.btn-signin {
+			padding: 8px 16px;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: #f5f5f7;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.btn-signin:hover {
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+
+		/* HERO SECTION */
+		.hero {
+			min-height: 100vh;
+			padding-top: 80px;
+			padding-bottom: 100px;
+			background: linear-gradient(135deg, #000000 0%, #0a0f2c 50%, #000000 100%);
+			position: relative;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.hero::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -10%;
+			width: 600px;
+			height: 600px;
+			background: radial-gradient(circle, rgba(0, 217, 255, 0.15) 0%, transparent 70%);
+			border-radius: 50%;
+			animation: float 6s ease-in-out infinite;
+		}
+
+		.hero::after {
+			content: '';
+			position: absolute;
+			bottom: -30%;
+			left: -5%;
+			width: 500px;
+			height: 500px;
+			background: radial-gradient(circle, rgba(0, 153, 255, 0.1) 0%, transparent 70%);
+			border-radius: 50%;
+			animation: float 8s ease-in-out infinite reverse;
+		}
+
+		@keyframes float {
+			0%, 100% { transform: translateY(0px); }
+			50% { transform: translateY(-20px); }
+		}
+
+		.hero-content {
+			max-width: 980px;
+			text-align: center;
+			position: relative;
+			z-index: 2;
+			padding: 0 24px;
+			animation: fadeInUp 1s ease-out;
+		}
+
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.hero h1 {
+			font-size: 72px;
+			font-weight: 700;
+			line-height: 1.05;
+			letter-spacing: -2px;
+			margin-bottom: 24px;
+			background: linear-gradient(135deg, #ffffff 0%, #00d9ff 50%, #0099ff 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			animation: fadeInUp 1s ease-out 0.1s both;
+		}
+
+		.hero p {
+			font-size: 20px;
+			color: #a1a1a6;
+			font-weight: 400;
+			max-width: 700px;
+			margin: 0 auto 48px;
+			line-height: 1.6;
+			animation: fadeInUp 1s ease-out 0.2s both;
+		}
+
+		.cta-group {
+			display: flex;
+			gap: 16px;
+			justify-content: center;
+			flex-wrap: wrap;
+			animation: fadeInUp 1s ease-out 0.3s both;
+		}
+
+		.btn-primary {
+			padding: 14px 40px;
+			background: linear-gradient(135deg, #00d9ff, #0099ff);
+			border: none;
+			border-radius: 24px;
+			color: #000000;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
+		}
+
+		.btn-primary:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 20px 60px rgba(0, 217, 255, 0.4);
+		}
+
+		.btn-primary:active {
+			transform: translateY(-2px);
+		}
+
+		.btn-secondary {
+			padding: 14px 40px;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			border-radius: 24px;
+			color: #f5f5f7;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.btn-secondary:hover {
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.5);
+			transform: translateY(-4px);
+		}
+
+		/* SECTIONS */
+		section {
+			padding: 100px 24px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.section-wrapper {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.section-header {
+			text-align: center;
+			margin-bottom: 80px;
+		}
+
+		.section-title {
+			font-size: 48px;
+			font-weight: 700;
+			letter-spacing: -1px;
+			margin-bottom: 16px;
+			color: #f5f5f7;
+		}
+
+		.section-subtitle {
+			font-size: 18px;
+			color: #a1a1a6;
+			font-weight: 400;
+			max-width: 600px;
+			margin: 0 auto;
+		}
+
+		/* METRICS SECTION */
+		.metrics-section {
+			background: linear-gradient(180deg, #0a0f2c 0%, #000000 100%);
+		}
+
+		.metrics-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 20px;
+			margin-bottom: 60px;
+		}
+
+		.metric-card {
+			padding: 32px;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 20px;
+			backdrop-filter: blur(20px);
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			cursor: pointer;
+		}
+
+		.metric-card:hover {
+			background: rgba(0, 217, 255, 0.1);
+			border-color: rgba(0, 217, 255, 0.3);
+			transform: translateY(-8px);
+			box-shadow: 0 20px 60px rgba(0, 217, 255, 0.2);
+		}
+
+		.metric-value {
+			font-size: 42px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #00d9ff, #0099ff);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 8px;
+		}
+
+		.metric-label {
+			font-size: 13px;
+			color: #a1a1a6;
+			font-weight: 500;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		/* TRADES SHOWCASE */
+		.trades-section {
+			background: #000000;
+		}
+
+		.trades-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 24px;
+			margin-bottom: 60px;
+		}
+
+		.trade-showcase {
+			group: 'trades';
+			padding: 28px;
+			background: rgba(255, 255, 255, 0.03);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 20px;
+			backdrop-filter: blur(20px);
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.trade-showcase::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+			transition: left 0.5s ease;
+		}
+
+		.trade-showcase:hover::before {
+			left: 100%;
+		}
+
+		.trade-showcase:hover {
+			background: rgba(0, 217, 255, 0.08);
+			border-color: rgba(0, 217, 255, 0.3);
+			transform: translateY(-12px);
+			box-shadow: 0 30px 80px rgba(0, 217, 255, 0.2);
+		}
+
+		.trade-rank {
+			display: inline-block;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #00d9ff, #0099ff);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			font-size: 16px;
+			color: #000000;
+			margin-bottom: 16px;
+		}
+
+		.trade-name {
+			font-size: 16px;
+			font-weight: 600;
+			color: #f5f5f7;
+			margin-bottom: 4px;
+		}
+
+		.trade-company {
+			font-size: 12px;
+			color: #a1a1a6;
+			margin-bottom: 20px;
+		}
+
+		.trade-bottom {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.trade-symbol {
+			display: inline-block;
+			padding: 6px 12px;
+			background: rgba(0, 217, 255, 0.15);
+			border: 1px solid rgba(0, 217, 255, 0.3);
+			border-radius: 12px;
+			color: #00d9ff;
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.trade-return {
+			font-size: 14px;
+			font-weight: 700;
+			color: #34c759;
+		}
+
+		/* SECTORS SHOWCASE */
+		.sectors-section {
+			background: linear-gradient(180deg, #000000 0%, #0a0f2c 100%);
+		}
+
+		.sectors-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 20px;
+			margin-bottom: 60px;
+		}
+
+		.sector-card {
+			padding: 40px 28px;
+			border-radius: 20px;
+			text-align: center;
+			color: white;
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.sector-card::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -50%;
+			width: 200%;
+			height: 200%;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+			transition: all 0.6s ease;
+		}
+
+		.sector-card:hover::before {
+			top: -30%;
+			right: -30%;
+		}
+
+		.sector-card:hover {
+			transform: translateY(-12px);
+		}
+
+		.sector-name {
+			font-size: 16px;
+			font-weight: 600;
+			margin-bottom: 8px;
+			position: relative;
+			z-index: 2;
+		}
+
+		.sector-volume {
+			font-size: 28px;
+			font-weight: 700;
+			position: relative;
+			z-index: 2;
+		}
+
+		.sector-1 { background: linear-gradient(135deg, #00d9ff 0%, #0099ff 100%); }
+		.sector-2 { background: linear-gradient(135deg, #ff006e 0%, #ff4db8 100%); }
+		.sector-3 { background: linear-gradient(135deg, #00f5ff 0%, #00a8cc 100%); }
+		.sector-4 { background: linear-gradient(135deg, #ffa500 0%, #ff7e5f 100%); }
+		.sector-5 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); filter: brightness(1.1); }
+		.sector-6 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+		/* CHARTS SECTION */
+		.charts-section {
+			background: #000000;
+		}
+
+		.charts-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+			gap: 32px;
+			margin-bottom: 60px;
+		}
+
+		.chart-card {
+			padding: 40px;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 24px;
+			backdrop-filter: blur(20px);
+			transition: all 0.4s ease;
+		}
+
+		.chart-card:hover {
+			background: rgba(0, 217, 255, 0.08);
+			border-color: rgba(0, 217, 255, 0.3);
+			transform: translateY(-8px);
+		}
+
+		.chart-title {
+			font-size: 16px;
+			font-weight: 600;
+			margin-bottom: 28px;
+			color: #f5f5f7;
+		}
+
+		.chart-wrapper {
+			position: relative;
+			height: 300px;
+		}
+
+		/* FEATURES SECTION */
+		.features-section {
+			background: linear-gradient(180deg, #0a0f2c 0%, #000000 100%);
+		}
+
+		.features-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 32px;
+			margin-bottom: 60px;
+		}
+
+		.feature-card {
+			padding: 48px 32px;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 24px;
+			text-align: center;
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.feature-card:hover {
+			background: rgba(0, 217, 255, 0.1);
+			border-color: rgba(0, 217, 255, 0.3);
+			transform: translateY(-12px);
+			box-shadow: 0 30px 80px rgba(0, 217, 255, 0.15);
+		}
+
+		.feature-icon {
+			font-size: 48px;
+			margin-bottom: 20px;
+			display: inline-block;
+			transition: transform 0.3s ease;
+		}
+
+		.feature-card:hover .feature-icon {
+			transform: scale(1.2) rotate(5deg);
+		}
+
+		.feature-title {
+			font-size: 18px;
+			font-weight: 600;
+			margin-bottom: 12px;
+			color: #f5f5f7;
+		}
+
+		.feature-desc {
+			font-size: 14px;
+			color: #a1a1a6;
+			line-height: 1.6;
+		}
+
+		/* CTA SECTION */
+		.cta-section {
+			background: linear-gradient(135deg, #000000 0%, #0a0f2c 50%, #000000 100%);
+			padding: 120px 24px;
+			text-align: center;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.cta-section::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 800px;
+			height: 800px;
+			background: radial-gradient(circle, rgba(0, 217, 255, 0.15) 0%, transparent 70%);
+			border-radius: 50%;
+			animation: pulse 4s ease-in-out infinite;
+		}
+
+		@keyframes pulse {
+			0%, 100% { transform: translateX(-50%) scale(1); }
+			50% { transform: translateX(-50%) scale(1.1); }
+		}
+
+		.cta-content {
+			max-width: 800px;
+			margin: 0 auto;
+			position: relative;
+			z-index: 2;
+		}
+
+		.cta-title {
+			font-size: 56px;
+			font-weight: 700;
+			letter-spacing: -1.5px;
+			margin-bottom: 20px;
+			background: linear-gradient(135deg, #ffffff 0%, #00d9ff 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		.cta-desc {
+			font-size: 18px;
+			color: #a1a1a6;
+			margin-bottom: 40px;
+			line-height: 1.6;
+		}
+
+		.btn-cta {
+			padding: 16px 44px;
+			background: linear-gradient(135deg, #00d9ff, #0099ff);
+			border: none;
+			border-radius: 28px;
+			color: #000000;
+			font-size: 15px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			box-shadow: 0 15px 50px rgba(0, 217, 255, 0.3);
+			display: inline-block;
+		}
+
+		.btn-cta:hover {
+			transform: translateY(-6px);
+			box-shadow: 0 25px 70px rgba(0, 217, 255, 0.4);
+		}
+
+		/* FOOTER */
+		footer {
+			background: #0a0a0a;
+			padding: 60px 24px;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+			text-align: center;
+			color: #a1a1a6;
+			font-size: 13px;
+		}
+
+		footer a {
+			color: #f5f5f7;
+			text-decoration: none;
+			transition: color 0.3s ease;
+			margin: 0 16px;
+		}
+
+		footer a:hover {
+			color: #00d9ff;
+		}
+
+		/* SCROLL ANIMATIONS */
+		.fade-in {
+			opacity: 0;
+			transform: translateY(30px);
+			transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.fade-in.visible {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		/* RESPONSIVE */
+		@media (max-width: 768px) {
+			.hero h1 {
+				font-size: 42px;
+			}
+
+			.hero p {
+				font-size: 16px;
+			}
+
+			.section-title {
+				font-size: 32px;
+			}
+
+			.charts-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.metrics-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.trades-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.sectors-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.features-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.cta-title {
+				font-size: 36px;
+			}
+
+			section {
+				padding: 60px 16px;
+			}
+
+			nav {
+				padding: 10px 16px;
+			}
+
+			.nav-links {
+				gap: 16px;
+			}
+		}
+	</style>
 </head>
 <body>
-    <nav>
-        <div class="logo">insiderbuying</div>
-        <div class="nav-links">
-            <a href="#trades">Trades</a>
-            <a href="#sectors">Sectors</a>
-            <a href="#analytics">Analytics</a>
-            <button class="btn-premium">Sign In</button>
-        </div>
-    </nav>
+	<!-- NAVIGATION -->
+	<nav>
+		<div class="logo">insiderbuying</div>
+		<div class="nav-links">
+			<a href="#trades">Trades</a>
+			<a href="#sectors">Sectors</a>
+			<a href="#analytics">Analytics</a>
+			<button class="btn-signin">Sign In</button>
+		</div>
+	</nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Where smart money moves</h1>
-            <p>Real-time insider trading intelligence powered by AI analysis of SEC filings.</p>
-            <div class="cta-buttons">
-                <button class="btn-primary">Get Started</button>
-                <button class="btn-secondary">Learn More</button>
-            </div>
-        </div>
-    </section>
+	<!-- HERO -->
+	<section class="hero">
+		<div class="hero-content">
+			<h1>Where smart money moves</h1>
+			<p>Real-time insider trading intelligence powered by AI analysis of SEC filings. Follow the experts.</p>
+			<div class="cta-group">
+				<button class="btn-primary">Get Started Free</button>
+				<button class="btn-secondary">Learn More</button>
+			</div>
+		</div>
+	</section>
 
-    <section class="metrics-section">
-        <div class="section-content">
-            <h2 class="section-title">Market Snapshot</h2>
-            <div class="metrics-grid">
-                <div class="metric">
-                    <div class="metric-number">482</div>
-                    <div class="metric-label">Insider Buys</div>
-                    <div class="metric-subtext">Last 24 hours</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-number">$2.4B</div>
-                    <div class="metric-label">Total Volume</div>
-                    <div class="metric-subtext">High conviction trades</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-number">7.8/10</div>
-                    <div class="metric-label">Confidence Index</div>
-                    <div class="metric-subtext">Strong signal</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-number">1,247</div>
-                    <div class="metric-label">Active Insiders</div>
-                    <div class="metric-subtext">Trading today</div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<!-- METRICS -->
+	<section class="metrics-section">
+		<div class="section-wrapper">
+			<div class="section-header">
+				<h2 class="section-title">Market Snapshot</h2>
+			</div>
+			<div class="metrics-grid">
+				<div class="metric-card fade-in">
+					<div class="metric-value">482</div>
+					<div class="metric-label">Insider Buys (24h)</div>
+				</div>
+				<div class="metric-card fade-in">
+					<div class="metric-value">$2.4B</div>
+					<div class="metric-label">Total Volume</div>
+				</div>
+				<div class="metric-card fade-in">
+					<div class="metric-value">7.8/10</div>
+					<div class="metric-label">Confidence Index</div>
+				</div>
+				<div class="metric-card fade-in">
+					<div class="metric-value">1,247</div>
+					<div class="metric-label">Active Insiders</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <section id="trades">
-        <div class="section-content">
-            <h2 class="section-title">Top Insider Trades</h2>
-            <p class="section-subtitle">Ranked by conviction score and potential impact</p>
-            <div class="trades-container">
-                <div class="trade-card">
-                    <div class="trade-rank">1</div>
-                    <div class="trade-name">Satya Nadella</div>
-                    <div class="trade-company">Microsoft, CEO</div>
-                    <span class="trade-symbol">MSFT</span>
-                    <div class="trade-return">+12.4%</div>
-                </div>
-                <div class="trade-card">
-                    <div class="trade-rank">2</div>
-                    <div class="trade-name">Tim Cook</div>
-                    <div class="trade-company">Apple, CEO</div>
-                    <span class="trade-symbol">AAPL</span>
-                    <div class="trade-return">+8.7%</div>
-                </div>
-                <div class="trade-card">
-                    <div class="trade-rank">3</div>
-                    <div class="trade-name">Jensen Huang</div>
-                    <div class="trade-company">NVIDIA, Founder</div>
-                    <span class="trade-symbol">NVDA</span>
-                    <div class="trade-return">+24.1%</div>
-                </div>
-                <div class="trade-card">
-                    <div class="trade-rank">4</div>
-                    <div class="trade-name">Sundar Pichai</div>
-                    <div class="trade-company">Google, CEO</div>
-                    <span class="trade-symbol">GOOGL</span>
-                    <div class="trade-return">+6.2%</div>
-                </div>
-                <div class="trade-card">
-                    <div class="trade-rank">5</div>
-                    <div class="trade-name">Mark Zuckerberg</div>
-                    <div class="trade-company">Meta, Founder</div>
-                    <span class="trade-symbol">META</span>
-                    <div class="trade-return">+18.5%</div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<!-- TOP TRADES -->
+	<section id="trades" class="trades-section">
+		<div class="section-wrapper">
+			<div class="section-header">
+				<h2 class="section-title">Top Insider Trades</h2>
+				<p class="section-subtitle">Ranked by conviction score and market impact</p>
+			</div>
+			<div class="trades-grid">
+				<div class="trade-showcase fade-in">
+					<div class="trade-rank">1</div>
+					<div class="trade-name">Satya Nadella</div>
+					<div class="trade-company">Microsoft — CEO</div>
+					<div class="trade-bottom">
+						<span class="trade-symbol">MSFT</span>
+						<span class="trade-return">+12.4%</span>
+					</div>
+				</div>
+				<div class="trade-showcase fade-in">
+					<div class="trade-rank">2</div>
+					<div class="trade-name">Tim Cook</div>
+					<div class="trade-company">Apple — CEO</div>
+					<div class="trade-bottom">
+						<span class="trade-symbol">AAPL</span>
+						<span class="trade-return">+8.7%</span>
+					</div>
+				</div>
+				<div class="trade-showcase fade-in">
+					<div class="trade-rank">3</div>
+					<div class="trade-name">Jensen Huang</div>
+					<div class="trade-company">NVIDIA — Founder</div>
+					<div class="trade-bottom">
+						<span class="trade-symbol">NVDA</span>
+						<span class="trade-return">+24.1%</span>
+					</div>
+				</div>
+				<div class="trade-showcase fade-in">
+					<div class="trade-rank">4</div>
+					<div class="trade-name">Sundar Pichai</div>
+					<div class="trade-company">Google — CEO</div>
+					<div class="trade-bottom">
+						<span class="trade-symbol">GOOGL</span>
+						<span class="trade-return">+6.2%</span>
+					</div>
+				</div>
+				<div class="trade-showcase fade-in">
+					<div class="trade-rank">5</div>
+					<div class="trade-name">Mark Zuckerberg</div>
+					<div class="trade-company">Meta — Founder</div>
+					<div class="trade-bottom">
+						<span class="trade-symbol">META</span>
+						<span class="trade-return">+18.5%</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <section id="sectors" style="background: #f5f5f7;">
-        <div class="section-content">
-            <h2 class="section-title">Sector Activity</h2>
-            <p class="section-subtitle">Insider buying intensity by sector</p>
-            <div class="sectors-grid">
-                <div class="sector-card" style="background: linear-gradient(135deg, #34c759 0%, #2d9d4f 100%);">
-                    <div class="sector-name">Technology</div>
-                    <div class="sector-volume">$840M</div>
-                </div>
-                <div class="sector-card" style="background: linear-gradient(135deg, #0071e3 0%, #0055b8 100%);">
-                    <div class="sector-name">Healthcare</div>
-                    <div class="sector-volume">$520M</div>
-                </div>
-                <div class="sector-card" style="background: linear-gradient(135deg, #a2845d 0%, #7a6244 100%);">
-                    <div class="sector-name">Finance</div>
-                    <div class="sector-volume">$680M</div>
-                </div>
-                <div class="sector-card" style="background: linear-gradient(135deg, #ff9500 0%, #d67e00 100%);">
-                    <div class="sector-name">Energy</div>
-                    <div class="sector-volume">$310M</div>
-                </div>
-                <div class="sector-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
-                    <div class="sector-name">Consumer</div>
-                    <div class="sector-volume">$440M</div>
-                </div>
-                <div class="sector-card" style="background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);">
-                    <div class="sector-name">Industrial</div>
-                    <div class="sector-volume">$210M</div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<!-- SECTORS -->
+	<section id="sectors" class="sectors-section">
+		<div class="section-wrapper">
+			<div class="section-header">
+				<h2 class="section-title">Sector Activity</h2>
+				<p class="section-subtitle">Insider buying intensity across markets</p>
+			</div>
+			<div class="sectors-grid">
+				<div class="sector-card sector-1 fade-in">
+					<div class="sector-name">Technology</div>
+					<div class="sector-volume">$840M</div>
+				</div>
+				<div class="sector-card sector-2 fade-in">
+					<div class="sector-name">Healthcare</div>
+					<div class="sector-volume">$520M</div>
+				</div>
+				<div class="sector-card sector-3 fade-in">
+					<div class="sector-name">Finance</div>
+					<div class="sector-volume">$680M</div>
+				</div>
+				<div class="sector-card sector-4 fade-in">
+					<div class="sector-name">Energy</div>
+					<div class="sector-volume">$310M</div>
+				</div>
+				<div class="sector-card sector-5 fade-in">
+					<div class="sector-name">Consumer</div>
+					<div class="sector-volume">$440M</div>
+				</div>
+				<div class="sector-card sector-6 fade-in">
+					<div class="sector-name">Industrial</div>
+					<div class="sector-volume">$210M</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <section id="analytics">
-        <div class="section-content">
-            <h2 class="section-title">Analytics</h2>
-            <div class="chart-container">
-                <div class="chart-box">
-                    <div class="chart-title">30-Day Trading Volume</div>
-                    <div class="chart-wrapper">
-                        <canvas id="activityChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-box">
-                    <div class="chart-title">Confidence Trend</div>
-                    <div class="chart-wrapper">
-                        <canvas id="confidenceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<!-- ANALYTICS -->
+	<section id="analytics" class="charts-section">
+		<div class="section-wrapper">
+			<div class="section-header">
+				<h2 class="section-title">Analytics & Insights</h2>
+				<p class="section-subtitle">Real-time market intelligence</p>
+			</div>
+			<div class="charts-grid">
+				<div class="chart-card fade-in">
+					<div class="chart-title">30-Day Trading Volume</div>
+					<div class="chart-wrapper">
+						<canvas id="activityChart"></canvas>
+					</div>
+				</div>
+				<div class="chart-card fade-in">
+					<div class="chart-title">Confidence Trend</div>
+					<div class="chart-wrapper">
+						<canvas id="confidenceChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <section style="background: #f5f5f7;">
-        <div class="section-content">
-            <h2 class="section-title">Why Choose insiderbuying</h2>
-            <div class="features-grid">
-                <div class="feature">
-                    <div class="feature-icon">🔍</div>
-                    <div class="feature-title">Real-time Data</div>
-                    <div class="feature-desc">Track insider trades as they happen with our proprietary SEC filing analysis.</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🤖</div>
-                    <div class="feature-title">AI-Powered</div>
-                    <div class="feature-desc">Advanced algorithms identify patterns and predict insider sentiment shifts.</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title">Track Record</div>
-                    <div class="feature-desc">Historical performance data on insider transactions and their market impact.</div>
-                </div>
-            </div>
-        </div>
-    </section>
+	<!-- FEATURES -->
+	<section class="features-section">
+		<div class="section-wrapper">
+			<div class="section-header">
+				<h2 class="section-title">Why Choose insiderbuying</h2>
+			</div>
+			<div class="features-grid">
+				<div class="feature-card fade-in">
+					<div class="feature-icon">⚡</div>
+					<div class="feature-title">Real-time Data</div>
+					<div class="feature-desc">Track insider trades as they happen with proprietary SEC filing analysis.</div>
+				</div>
+				<div class="feature-card fade-in">
+					<div class="feature-icon">🤖</div>
+					<div class="feature-title">AI-Powered</div>
+					<div class="feature-desc">Advanced algorithms identify patterns before the market reacts.</div>
+				</div>
+				<div class="feature-card fade-in">
+					<div class="feature-icon">📊</div>
+					<div class="feature-title">Track Record</div>
+					<div class="feature-desc">Historical performance data on insider transactions and accuracy.</div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-    <section class="cta-section">
-        <div class="cta-content">
-            <h2 class="cta-title">Ready to follow the smart money?</h2>
-            <p class="cta-text">Start tracking insider intelligence that moves markets.</p>
-            <button class="btn-cta">Get Started Free →</button>
-        </div>
-    </section>
+	<!-- CTA -->
+	<section class="cta-section">
+		<div class="cta-content">
+			<h2 class="cta-title">Ready to follow the smart money?</h2>
+			<p class="cta-desc">Join thousands tracking insider intelligence that moves markets.</p>
+			<button class="btn-cta">Start Tracking Free →</button>
+		</div>
+	</section>
 
-    <footer>
-        <div style="margin-bottom: 16px;">
-            <a href="#" style="color: #666; text-decoration: none; margin: 0 16px;">Terms</a>
-            <a href="#" style="color: #666; text-decoration: none; margin: 0 16px;">Privacy</a>
-            <a href="#" style="color: #666; text-decoration: none; margin: 0 16px;">Contact</a>
-        </div>
-        <p>&copy; 2024 insiderbuying. All rights reserved.</p>
-    </footer>
+	<!-- FOOTER -->
+	<footer>
+		<div style="margin-bottom: 20px;">
+			<a href="#">Terms of Service</a>
+			<a href="#">Privacy Policy</a>
+			<a href="#">Contact</a>
+		</div>
+		<p>&copy; 2024 insiderbuying. Where smart money moves.</p>
+	</footer>
 
-    <script>
-        const activityCtx = document.getElementById('activityChart').getContext('2d');
-        new Chart(activityCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'Volume ($M)',
-                    data: [420, 580, 510, 680, 720, 380, 340],
-                    backgroundColor: '#0071e3',
-                    borderRadius: 8,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { color: '#999' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#999' }
-                    }
-                }
-            }
-        });
+	<script>
+		// Scroll animations
+		const observerOptions = {
+			threshold: 0.1,
+			rootMargin: '0px 0px -50px 0px'
+		};
 
-        const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
-        new Chart(confidenceCtx, {
-            type: 'line',
-            data: {
-                labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'],
-                datasets: [{
-                    label: 'Confidence',
-                    data: [6.2, 6.8, 7.1, 7.8, 7.5, 8.1],
-                    borderColor: '#0071e3',
-                    backgroundColor: 'rgba(0, 113, 227, 0.05)',
-                    borderWidth: 3,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#0071e3',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 10,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { color: '#999' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#999' }
-                    }
-                }
-            }
-        });
+		const observer = new IntersectionObserver(function(entries) {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					entry.target.classList.add('visible');
+				}
+			});
+		}, observerOptions);
 
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-    </script>
+		document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+		// Activity Chart
+		const activityCtx = document.getElementById('activityChart').getContext('2d');
+		new Chart(activityCtx, {
+			type: 'bar',
+			data: {
+				labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+				datasets: [{
+					label: 'Volume ($M)',
+					data: [420, 580, 510, 680, 720, 380, 340],
+					backgroundColor: 'rgba(0, 217, 255, 0.7)',
+					borderColor: 'rgba(0, 217, 255, 1)',
+					borderWidth: 2,
+					borderRadius: 12,
+					borderSkipped: false,
+					hoverBackgroundColor: 'rgba(0, 217, 255, 0.9)'
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false }
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						grid: { color: 'rgba(255, 255, 255, 0.05)' },
+						ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+					},
+					x: {
+						grid: { display: false },
+						ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+					}
+				}
+			}
+		});
+
+		// Confidence Chart
+		const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+		new Chart(confidenceCtx, {
+			type: 'line',
+			data: {
+				labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'],
+				datasets: [{
+					label: 'Confidence Score',
+					data: [6.2, 6.8, 7.1, 7.8, 7.5, 8.1],
+					borderColor: 'rgba(0, 217, 255, 1)',
+					backgroundColor: 'rgba(0, 217, 255, 0.1)',
+					borderWidth: 3,
+					pointRadius: 6,
+					pointBackgroundColor: 'rgba(0, 217, 255, 1)',
+					pointBorderColor: '#000000',
+					pointBorderWidth: 2,
+					tension: 0.4,
+					fill: true,
+					hoverPointRadius: 8
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false }
+				},
+				scales: {
+					y: {
+						beginAtZero: true,
+						max: 10,
+						grid: { color: 'rgba(255, 255, 255, 0.05)' },
+						ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+					},
+					x: {
+						grid: { display: false },
+						ticks: { color: 'rgba(255, 255, 255, 0.6)' }
+					}
+				}
+			}
+		});
+
+		// Smooth scroll for nav links
+		document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+			anchor.addEventListener('click', function (e) {
+				e.preventDefault();
+				const target = document.querySelector(this.getAttribute('href'));
+				if (target) {
+					target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
+			});
+		});
+	</script>
 </body>
 </html>
